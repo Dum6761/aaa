@@ -13,40 +13,48 @@
         #video-container { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; }
         video { position: absolute; width: 100%; height: 100%; object-fit: cover; filter: brightness(0.8); z-index: 1; }
         
-        #crosshair { position: absolute; top: 50%; left: 50%; width: 100px; height: 100px; transform: translate(-50%, -50%); pointer-events: none; z-index: 5; }
-        #crosshair::before { content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 1px; background: rgba(0, 255, 102, 0.5); }
-        #crosshair::after { content: ''; position: absolute; left: 50%; top: 0; width: 1px; height: 100%; background: rgba(0, 255, 102, 0.5); }
-        .aim-ring { position: absolute; top: 50%; left: 50%; width: 40px; height: 40px; border: 2px solid #00ff66; border-radius: 50%; transform: translate(-50%, -50%); opacity: 0.7; }
-        .center-dot { position: absolute; top: 50%; left: 50%; width: 4px; height: 4px; background: #ff3e3e; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 8px #ff3e3e; }
+        /* Instruction Banner */
+        #instruction-banner { background: #00ff9d; color: #000; padding: 10px; text-align: center; font-weight: 700; font-size: 14px; position: relative; z-index: 20; box-shadow: 0 4px 15px rgba(0,255,157,0.4); }
 
-        .hud { position: relative; z-index: 10; padding: 12px; background: rgba(11, 15, 25, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; margin: 10px; }
-        #instruction-banner { background: #00ff66; color: #000; padding: 8px; text-align: center; font-weight: bold; font-size: 14px; border-radius: 0 0 12px 12px; position: relative; z-index: 11; box-shadow: 0 4px 15px rgba(0,255,102,0.3); }
-        
-        #top-hud { display: grid; grid-template-columns: 1.2fr 1fr 0.5fr; gap: 8px; align-items: center; margin-top: 5px; }
+        /* Targeting System */
+        #crosshair { position: absolute; top: 45%; left: 50%; width: 120px; height: 120px; transform: translate(-50%, -50%); pointer-events: none; z-index: 5; display: flex; align-items: center; justify-content: center; }
+        .aim-ring { width: 50px; height: 50px; border: 2px solid rgba(0, 255, 157, 0.5); border-radius: 50%; position: absolute; }
+        .aim-ring::before { content: ''; position: absolute; inset: -10px; border: 2px solid transparent; border-top-color: #00ff9d; border-bottom-color: #00ff9d; border-radius: 50%; animation: spin 4s linear infinite; }
+        .center-dot { width: 6px; height: 6px; background: #ff3e3e; border-radius: 50%; box-shadow: 0 0 10px #ff3e3e; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* UI Overlay */
+        #ui-layer { position: relative; z-index: 10; height: 100%; display: flex; flex-direction: column; pointer-events: none; }
+        #ui-layer > * { pointer-events: auto; }
+
+        .hud { padding: 12px; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; margin: 10px; }
+        #top-hud { display: grid; grid-template-columns: 1.2fr 1fr 0.5fr; gap: 8px; align-items: center; }
         .sensor-box { display: flex; flex-direction: column; gap: 2px; }
         .sensor-label { font-size: 10px; text-transform: uppercase; color: #9ca3af; letter-spacing: 1px; }
-        .sensor-value { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 700; color: #00ff66; }
-        input { padding: 4px 8px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px; width: 100%; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: bold; outline: none; }
-        .btn-torch { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); height: 38px; border-radius: 10px; color: #ffcc00; font-size: 16px; cursor: pointer; }
+        .sensor-value { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; color: #00ff9d; }
+        input { padding: 4px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px; width: 100%; text-align: center; font-family: 'JetBrains Mono', monospace; outline: none; }
+        .btn-torch { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); height: 40px; border-radius: 10px; color: #ffcc00; font-size: 18px; cursor: pointer; }
         .btn-torch.active { background: #ffcc00; color: #000; }
-        #result-hud { bottom: 310px; left: 15px; right: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: center; }
-        .res-card { padding: 8px; border-radius: 12px; background: rgba(255,255,255,0.03); }
-        .res-num { font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 700; margin-top: 4px; }
+
+        #result-hud { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: center; margin-top: auto; }
+        .res-card { padding: 8px; border-radius: 12px; background: rgba(255,255,255,0.05); border-bottom: 3px solid transparent; }
+        .res-num { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 800; margin-top: 2px; }
         
-        #controls { margin-top: auto; padding: 10px 15px 20px 15px; display: flex; flex-direction: column; gap: 8px; z-index: 10; }
+        #controls { padding: 0 10px 15px 10px; display: flex; flex-direction: column; gap: 8px; }
         .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .btn { display: flex; align-items: center; justify-content: center; gap: 6px; color: #fff; border: none; padding: 14px; font-size: 15px; font-weight: 700; border-radius: 12px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2); -webkit-tap-highlight-color: transparent; }
+        .btn { display: flex; align-items: center; justify-content: center; gap: 6px; color: #fff; border: none; padding: 14px; font-size: 14px; font-weight: 700; border-radius: 12px; cursor: pointer; transition: 0.2s; -webkit-tap-highlight-color: transparent; }
         .btn-sensor { background: #4b5563; grid-column: span 2; }
-        .btn-base { background: #2563eb; }
-        .btn-top { background: #059669; }
-        .btn-side { background: #7c3aed; }
-        .btn-reset { background: #4b5563; font-size: 14px; padding: 10px; }
-        .btn-export { background: #ea580c; font-size: 14px; padding: 10px; }
-        .btn:active { transform: scale(0.95); filter: brightness(1.2); }
+        .btn-base { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+        .btn-top { background: linear-gradient(135deg, #059669, #047857); }
+        .btn-side { background: linear-gradient(135deg, #7c3aed, #5b21b6); }
+        .btn-reset { background: #374151; font-size: 12px; }
+        .btn-export { background: #ea580c; font-size: 12px; }
+        
+        .btn:active { transform: scale(0.96); filter: brightness(1.2); }
         .active-step { outline: 3px solid #fff; box-shadow: 0 0 20px #fff; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
 
-        #history-panel { height: 100px; overflow-y: auto; background: rgba(0,0,0,0.7); margin: 0 15px 10px 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); padding: 8px; font-size: 12px; position: relative; z-index: 10; }
+        #history-panel { height: 100px; overflow-y: auto; background: rgba(0,0,0,0.6); margin: 0 15px 10px 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); padding: 8px; font-size: 11px; }
         .history-item { display: grid; grid-template-columns: 0.5fr 1fr 1fr 1.2fr; gap: 5px; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.1); color: #d1d5db; }
         .disabled { opacity: 0.4; pointer-events: none; }
     </style>
@@ -59,50 +67,54 @@
         <div class="aim-ring"></div>
         <div class="center-dot"></div>
     </div>
-    <div id="top-hud" class="hud">
-        <div class="sensor-box">
-            <span class="sensor-label">Tilt / Yaw</span>
-            <span class="sensor-value"><span id="live-tilt">0.0</span>° / <span id="live-yaw">0.0</span>°</span>
+    
+    <div id="ui-layer">
+        <div id="top-hud" class="hud">
+            <div class="sensor-box">
+                <span class="sensor-label">Tilt / Yaw</span><br>
+                <span class="sensor-value"><span id="live-tilt">0.0</span>° / <span id="live-yaw">0.0</span>°</span>
+            </div>
+            <div class="input-box">
+                <span class="sensor-label">Eye H. (m)</span>
+                <input type="number" id="eye-height" value="1.60" step="0.01">
+            </div>
+            <button class="btn-torch" id="btn-torch">🔦</button>
         </div>
-        <div class="input-box">
-            <span class="sensor-label">Eye H. (m)</span>
-            <input type="number" id="eye-height" value="1.60" step="0.01">
-        </div>
-        <button class="btn-torch" id="btn-torch">🔦</button>
-    </div>
-    <div id="result-hud" class="hud">
-        <div class="res-card" style="border-bottom: 3px solid #3b82f6;">
-            <span class="sensor-label">Distance (D)</span>
-            <div class="res-num" style="color: #3b82f6;"><span id="val-d">--</span><span style="font-size:14px;"> m</span></div>
-        </div>
-        <div class="res-card" style="border-bottom: 3px solid #00ff66;">
-            <span class="sensor-label">Total Height</span>
-            <div class="res-num" style="color: #00ff66;"><span id="val-height">--</span><span style="font-size:14px;"> m</span></div>
-        </div>
-        <div class="res-card" style="border-bottom: 3px solid #a78bfa; grid-column: span 2;">
-            <span class="sensor-label">Tree Girth (เส้นรอบวง)</span>
-            <div class="res-num" style="color: #a78bfa;"><span id="val-girth">--</span><span style="font-size:14px;"> cm</span></div>
-        </div>
-    </div>
 
-    <div id="history-panel">
-        <div style="color:#9ca3af; text-align:center; margin-bottom:5px; font-size:10px; letter-spacing:1px;">HISTORY LOG</div>
-        <div id="log-container"></div>
-    </div>
+        <div id="result-hud" class="hud">
+            <div class="res-card" style="border-color: #3b82f6;">
+                <span class="sensor-label">Distance (m)</span>
+                <div class="res-num" style="color: #3b82f6;" id="val-d">--</div>
+            </div>
+            <div class="res-card" style="border-color: #00ff9d;">
+                <span class="sensor-label">Height (m)</span>
+                <div class="res-num" style="color: #00ff9d;" id="val-height">--</div>
+            </div>
+            <div class="res-card" style="border-color: #a78bfa; grid-column: span 2;">
+                <span class="sensor-label">Girth (cm)</span>
+                <div class="res-num" style="color: #a78bfa;" id="val-girth">--</div>
+            </div>
+        </div>
 
-    <div id="controls">
-        <button class="btn btn-sensor" id="btn-request">🛰️ 1. Calibrate AI Sensors</button>
-        <div class="btn-group">
-            <button class="btn btn-base disabled" id="btn-base">📐 2. Lock Base</button>
-            <button class="btn btn-top disabled" id="btn-top">🌲 3. Lock Top</button>
+        <div id="history-panel">
+            <div style="color:#9ca3af; text-align:center; margin-bottom:5px; font-size:10px; letter-spacing:1px;">HISTORY LOG</div>
+            <div id="log-container"></div>
         </div>
-        <div class="btn-group">
-            <button class="btn btn-side disabled" id="btn-left">⬅️ 4. Lock Left Edge</button>
-            <button class="btn btn-side disabled" id="btn-right">➡️ 5. Lock Right Edge</button>
-        </div>
-        <div class="btn-group">
-            <button class="btn btn-reset" id="btn-reset">🗑️ Reset</button>
-            <button class="btn btn-export" id="btn-export">📥 Export CSV</button>
+
+        <div id="controls">
+            <button class="btn btn-sensor" id="btn-request">🛰️ 1. Start Sensors</button>
+            <div class="btn-group">
+                <button class="btn btn-base disabled" id="btn-base">📐 2. Lock Base</button>
+                <button class="btn btn-top disabled" id="btn-top">🌲 3. Lock Top</button>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-side disabled" id="btn-left">⬅️ 4. Left Edge</button>
+                <button class="btn btn-side disabled" id="btn-right">➡️ 5. Right Edge</button>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-reset" id="btn-reset">🗑️ Reset</button>
+                <button class="btn btn-export" id="btn-export">📥 Export CSV</button>
+            </div>
         </div>
     </div>
 </div>
@@ -154,25 +166,24 @@
     function startSensors() {
         window.addEventListener('deviceorientation', handleOrientation);
         document.querySelectorAll('.btn').forEach(b => b.classList.remove('disabled'));
-        setStep(2);
+        updateStep(2);
         triggerVibration(100);
     }
 
-    function setStep(num) {
-        const steps = {
-            1: "กรุณากดปุ่ม 1 เพื่อเริ่มระบบเซนเซอร์",
+    function updateStep(step) {
+        const info = {
             2: "เล็งที่โคนต้นไม้ (ระดับดิน) แล้วกดปุ่ม 2",
             3: "เล็งที่ยอดไม้ แล้วกดปุ่ม 3",
             4: "เล็งที่ขอบเปลือกไม้ด้านซ้าย แล้วกดปุ่ม 4",
             5: "เล็งที่ขอบเปลือกไม้ด้านขวา แล้วกดปุ่ม 5",
-            6: "บันทึกข้อมูลแล้ว! กดปุ่ม 2 เพื่อเริ่มต้นใหม่"
+            6: "บันทึกเรียบร้อย! กดปุ่ม 2 เพื่อเริ่มต้นใหม่"
         };
-        instruction.innerText = steps[num];
+        instruction.innerText = info[step] || "";
         document.querySelectorAll('.btn').forEach(b => b.classList.remove('active-step'));
-        if (num === 2) document.getElementById('btn-base').classList.add('active-step');
-        if (num === 3) document.getElementById('btn-top').classList.add('active-step');
-        if (num === 4) document.getElementById('btn-left').classList.add('active-step');
-        if (num === 5) document.getElementById('btn-right').classList.add('active-step');
+        if (step === 2) document.getElementById('btn-base').classList.add('active-step');
+        if (step === 3) document.getElementById('btn-top').classList.add('active-step');
+        if (step === 4) document.getElementById('btn-left').classList.add('active-step');
+        if (step === 5) document.getElementById('btn-right').classList.add('active-step');
     }
 
     function handleOrientation(event) {
@@ -198,7 +209,7 @@
         distanceD = eyeHeight / Math.tan(angleFromHorizontalRad);
         document.getElementById('val-d').innerText = distanceD.toFixed(2);
         localStorage.setItem('last_d', distanceD);
-        setStep(3);
+        updateStep(3);
     });
 
     document.getElementById('btn-top').addEventListener('click', () => {
@@ -212,13 +223,13 @@
         // Since baseAngle is usually negative (down), tan(top) - tan(-base) = tan(top) + tan(base)
         const totalHeight = distanceD * (Math.tan(topRad) - Math.tan(baseRad));
         document.getElementById('val-height').innerText = totalHeight.toFixed(2);
-        setStep(4);
+        updateStep(4);
     });
 
     document.getElementById('btn-left').addEventListener('click', () => {
         triggerVibration(50);
         leftYaw = currentYaw;
-        setStep(5);
+        updateStep(5);
     });
 
     document.getElementById('btn-right').addEventListener('click', () => {
@@ -241,14 +252,14 @@
         const record = {
             id: measurements.length + 1,
             dist: distanceD.toFixed(2),
-            height: document.getElementById('val-height').innerText,
+            height: document.getElementById('val-height').innerText || "0.00",
             girth: girth_cm.toFixed(1),
             time: new Date().toLocaleTimeString('th-TH')
         };
         measurements.unshift(record);
         localStorage.setItem('forestry_data', JSON.stringify(measurements));
         updateLogUI();
-        setStep(6);
+        updateStep(6);
     });
 
     function updateLogUI() {
@@ -283,7 +294,7 @@
         document.getElementById('val-girth').innerText = "--";
         updateLogUI();
         triggerVibration(50);
-        setStep(2);
+        updateStep(2);
     });
 </script>
 </body>
