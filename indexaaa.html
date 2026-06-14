@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Forestry Pro AI - Ultra Edition</title>
+    <link rel="preconnect" href="https://googleapis.com">
+    <link rel="preconnect" href="https://gstatic.com" crossorigin>
+    <link href="https://googleapis.com/css2?family=Chakra+Petch:wght@400;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Chakra Petch', sans-serif; }
+        body, html { width: 100%; height: 100%; background: #0b0f19; overflow: hidden; color: #f3f4f6; }
+        #video-container { position: relative; width: 100%; height: 100%; }
+        video { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.9); }
+        #crosshair { position: absolute; top: 45%; left: 50%; width: 60px; height: 60px; transform: translate(-50%, -50%); pointer-events: none; }
+        #crosshair::before { content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, rgba(0,255,102,0) 0%, rgba(0,255,102,1) 30%, rgba(0,255,102,1) 70%, rgba(0,255,102,0) 100%); }
+        #crosshair::after { content: ''; position: absolute; left: 50%; top: 0; width: 2px; height: 100%; background: linear-gradient(180deg, rgba(0,255,102,0) 0%, rgba(0,255,102,1) 30%, rgba(0,255,102,1) 70%, rgba(0,255,102,0) 100%); }
+        .center-dot { position: absolute; top: 50%; left: 50%; width: 6px; height: 6px; background: #00ff66; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 10px #00ff66; }
+        .hud { position: absolute; padding: 12px; background: rgba(11, 15, 25, 0.85); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+        #top-hud { top: 15px; left: 15px; right: 15px; display: grid; grid-template-columns: 1.2fr 1fr 0.5fr; gap: 8px; align-items: center; }
+        .sensor-box { display: flex; flex-direction: column; gap: 2px; }
+        .sensor-label { font-size: 10px; text-transform: uppercase; color: #9ca3af; letter-spacing: 1px; }
+        .sensor-value { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 700; color: #00ff66; }
+        input { padding: 4px 8px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 8px; width: 100%; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: bold; outline: none; }
+        .btn-torch { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); height: 38px; border-radius: 10px; color: #ffcc00; font-size: 16px; cursor: pointer; }
+        .btn-torch.active { background: #ffcc00; color: #000; }
+        #result-hud { bottom: 310px; left: 15px; right: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: center; }
+        .res-card { padding: 8px; border-radius: 12px; background: rgba(255,255,255,0.03); }
+        .res-num { font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 700; margin-top: 4px; }
+        #controls { position: absolute; bottom: 15px; left: 0; width: 100%; display: flex; flex-direction: column; gap: 8px; padding: 0 15px; }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .btn { display: flex; align-items: center; justify-content: center; gap: 6px; color: #fff; border: none; padding: 14px; font-size: 15px; font-weight: 700; border-radius: 12px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2); -webkit-tap-highlight-color: transparent; }
+        .btn-sensor { background: linear-gradient(135deg, #4b5563, #1f2937); grid-column: span 2; }
+        .btn-base { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+        .btn-top { background: linear-gradient(135deg, #059669, #047857); }
+        .btn-side { background: linear-gradient(135deg, #7c3aed, #5b21b6); }
+        .btn-reset { background: #4b5563; font-size: 14px; padding: 10px; }
+        .btn-export { background: #ea580c; font-size: 14px; padding: 10px; }
+        .btn:active, .btn-torch:active { transform: scale(0.97); filter: brightness(0.9); }
+
+        #history-panel { height: 120px; overflow-y: auto; background: rgba(0,0,0,0.7); margin: 0 15px 10px 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); padding: 8px; font-size: 12px; }
+        .history-item { display: grid; grid-template-columns: 0.5fr 1fr 1fr 1.2fr; gap: 5px; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.1); color: #d1d5db; }
+        .disabled { opacity: 0.4; pointer-events: none; }
+    </style>
+</head>
+<body>
+<div id="video-container">
+    <video id="webcam" autoplay playsinline></video>
+    <div id="crosshair"><div class="center-dot"></div></div>
+    <div id="top-hud" class="hud">
+        <div class="sensor-box">
+            <span class="sensor-label">Tilt / Yaw</span>
+            <span class="sensor-value"><span id="live-tilt">0.0</span>° / <span id="live-yaw">0.0</span>°</span>
+        </div>
+        <div class="input-box">
+            <span class="sensor-label">Eye H. (m)</span>
+            <input type="number" id="eye-height" value="1.60" step="0.01">
+        </div>
+        <button class="btn-torch" id="btn-torch">🔦</button>
+    </div>
+    <div id="result-hud" class="hud">
+        <div class="res-card" style="border-bottom: 3px solid #3b82f6;">
+            <span class="sensor-label">Distance (D)</span>
+            <div class="res-num" style="color: #3b82f6;"><span id="val-d">--</span><span style="font-size:14px;"> m</span></div>
+        </div>
+        <div class="res-card" style="border-bottom: 3px solid #00ff66;">
+            <span class="sensor-label">Total Height</span>
+            <div class="res-num" style="color: #00ff66;"><span id="val-height">--</span><span style="font-size:14px;"> m</span></div>
+        </div>
+        <div class="res-card" style="border-bottom: 3px solid #a78bfa; grid-column: span 2;">
+            <span class="sensor-label">Tree Girth (เส้นรอบวง)</span>
+            <div class="res-num" style="color: #a78bfa;"><span id="val-girth">--</span><span style="font-size:14px;"> cm</span></div>
+        </div>
+    </div>
+
+    <div id="history-panel">
+        <div style="color:#9ca3af; text-align:center; margin-bottom:5px; font-size:10px; letter-spacing:1px;">HISTORY LOG</div>
+        <div id="log-container"></div>
+    </div>
+
+    <div id="controls">
+        <button class="btn btn-sensor" id="btn-request">🛰️ 1. Calibrate AI Sensors</button>
+        <div class="btn-group">
+            <button class="btn btn-base disabled" id="btn-base">📐 2. Lock Base</button>
+            <button class="btn btn-top disabled" id="btn-top">🌲 3. Lock Top</button>
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-side disabled" id="btn-left">⬅️ 4. Lock Left Edge</button>
+            <button class="btn btn-side disabled" id="btn-right">➡️ 5. Lock Right Edge</button>
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-reset" id="btn-reset">🗑️ Reset</button>
+            <button class="btn btn-export" id="btn-export">📥 Export CSV</button>
+        </div>
+    </div>
+</div>
+<script>
+    const video = document.getElementById('webcam');
+    const torchBtn = document.getElementById('btn-torch');
+    const logContainer = document.getElementById('log-container');
+    let currentTilt = 0, currentYaw = 0, baseAngle = 0, topAngle = 0, distanceD = 0;
+    let leftYaw = null, rightYaw = null, videoTrack = null, torchActive = false;
+    let measurements = [];
+
+    // Load History on Start
+    const saved = localStorage.getItem('forestry_data');
+    if(saved) { measurements = JSON.parse(saved); updateLogUI(); }
+
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } } })
+        .then(stream => { video.srcObject = stream; videoTrack = stream.getVideoTracks()[0]; })
+        .catch(() => {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => { video.srcObject = stream; videoTrack = stream.getVideoTracks()[0]; });
+        });
+
+    torchBtn.addEventListener('click', async () => {
+        if (!videoTrack) return;
+        try {
+            const caps = videoTrack.getCapabilities ? videoTrack.getCapabilities() : {};
+            if (caps.torch) {
+                torchActive = !torchActive;
+                await videoTrack.applyConstraints({ advanced: [{ torch: torchActive }] });
+                torchBtn.classList.toggle('active', torchActive);
+                triggerVibration(50);
+            } else { alert("อุปกรณ์ไม่รองรับการเปิดไฟฉายผ่านเว็บบราวเซอร์"); }
+        } catch (err) { console.error(err); }
+    });
+
+    document.getElementById('btn-request').addEventListener('click', async () => {
+        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+            try {
+                const permission = await DeviceOrientationEvent.requestPermission();
+                if (permission === 'granted') startSensors();
+            } catch (e) { alert("Permission denied"); }
+        } else {
+            startSensors();
+        }
+    });
+
+    function startSensors() {
+        window.addEventListener('deviceorientation', handleOrientation);
+        document.querySelectorAll('.btn').forEach(b => b.classList.remove('disabled'));
+        triggerVibration(100);
+    }
+
+    function handleOrientation(event) {
+        let tilt = event.beta - 90; 
+        currentTilt = tilt;
+        document.getElementById('live-tilt').innerText = tilt.toFixed(1);
+        let yaw = event.alpha; 
+        currentYaw = yaw;
+        document.getElementById('live-yaw').innerText = yaw.toFixed(1);
+    }
+
+    function triggerVibration(ms) { if (navigator.vibrate) navigator.vibrate(ms); }
+
+    document.getElementById('btn-base').addEventListener('click', () => {
+        triggerVibration(50);
+        baseAngle = currentTilt; // Angle to the base
+        const eyeHeight = parseFloat(document.getElementById('eye-height').value);
+        
+        // Formula: Horizontal Distance = EyeHeight / tan(tilt_angle)
+        // In portrait vertical=90, tilt down makes it < 90. tilt = currentTilt - 90.
+        const angleFromHorizontalRad = Math.abs(baseAngle) * (Math.PI / 180);
+        if (angleFromHorizontalRad === 0) return alert("มุมระนาบเกินไป ไม่สามารถคำนวณระยะได้");
+        distanceD = eyeHeight / Math.tan(angleFromHorizontalRad);
+        document.getElementById('val-d').innerText = distanceD.toFixed(2);
+        localStorage.setItem('last_d', distanceD);
+    });
+
+    document.getElementById('btn-top').addEventListener('click', () => {
+        if (distanceD === 0) return alert("กรุณา Lock Base (ปุ่ม 2) เพื่อหาระยะ D ก่อนคำนวณความสูงครับ");
+        triggerVibration(80);
+        topAngle = currentTilt;
+        const baseRad = baseAngle * (Math.PI / 180);
+        const topRad = topAngle * (Math.PI / 180);
+        
+        // Formula: Total Height = D * (tan(angle_top) - tan(angle_base))
+        // Since baseAngle is usually negative (down), tan(top) - tan(-base) = tan(top) + tan(base)
+        const totalHeight = distanceD * (Math.tan(topRad) - Math.tan(baseRad));
+        document.getElementById('val-height').innerText = totalHeight.toFixed(2);
+    });
+
+    document.getElementById('btn-left').addEventListener('click', () => {
+        triggerVibration(50);
+        leftYaw = currentYaw;
+    });
+
+    document.getElementById('btn-right').addEventListener('click', () => {
+        if (distanceD === 0 || leftYaw === null) return alert("กรุณา Lock Distance และ Left Edge ก่อนครับ");
+        triggerVibration(200);
+        rightYaw = currentYaw;
+
+        let diff = Math.abs(leftYaw - rightYaw);
+        if (diff > 180) diff = 360 - diff;
+        const thetaRad = diff * (Math.PI / 180);
+
+        // Tangential Geometry Formula
+        const sinTheta2 = Math.sin(thetaRad / 2);
+        const r = (distanceD * sinTheta2) / (1 - sinTheta2);
+        const girth_cm = 2 * Math.PI * r * 100; 
+
+        document.getElementById('val-girth').innerText = girth_cm.toFixed(1);
+        
+        // Save to History
+        const record = {
+            id: measurements.length + 1,
+            dist: distanceD.toFixed(2),
+            height: document.getElementById('val-height').innerText,
+            girth: girth_cm.toFixed(1),
+            time: new Date().toLocaleTimeString('th-TH')
+        };
+        measurements.unshift(record);
+        localStorage.setItem('forestry_data', JSON.stringify(measurements));
+        updateLogUI();
+    });
+
+    function updateLogUI() {
+        logContainer.innerHTML = measurements.map(m => `
+            <div class="history-item">
+                <span style="color:#00ff66; font-weight:bold;">#${m.id}</span>
+                <span>H: ${m.height}m</span>
+                <span>G: ${m.girth}cm</span>
+                <span style="color:#64748b; font-size:10px; text-align:right;">${m.time}</span>
+            </div>
+        `).join('');
+    }
+
+    document.getElementById('btn-export').addEventListener('click', () => {
+        if (measurements.length === 0) return alert("ไม่มีข้อมูลให้ส่งออก");
+        let csv = "\uFEFFID,Time,Distance(m),Height(m),Girth(cm)\n";
+        measurements.forEach(m => csv += `${m.id},${m.time},${m.dist},${m.height},${m.girth}\n`);
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `Forestry_Export_${new Date().toISOString().slice(0,10)}.csv`;
+        link.click();
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', () => {
+        if(!confirm("คุณต้องการล้างข้อมูลทั้งหมดใช่หรือไม่?")) return;
+        distanceD = 0; leftYaw = null; rightYaw = null;
+        measurements = [];
+        localStorage.removeItem('forestry_data');
+        document.getElementById('val-d').innerText = "--";
+        document.getElementById('val-height').innerText = "--";
+        document.getElementById('val-girth').innerText = "--";
+        updateLogUI();
+        triggerVibration(50);
+    });
+</script>
+</body>
+</html>
